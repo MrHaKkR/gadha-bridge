@@ -1,9 +1,21 @@
-{
-  "name": "com.prasanth.plugin.gadha_bridge",
-  "version": "0.1.0",
-  "description": "Bridge between ToolNeuron and Gadha backend",
-  "entry_point": "com.prasanth.gadha.GadhaPlugin",
-  "capabilities": ["chat","api"],
-  "api": "v1",
-  "type": "api"
+package com.prasanth.gadha
+
+import android.content.Context
+
+class GadhaPlugin(private val context: Context) {
+
+    fun onStart() {
+        println("GadhaPlugin started")
+        // Initialize backend connections here
+    }
+
+    fun onStop() {
+        println("GadhaPlugin stopped")
+        // Clean up here
+    }
+
+    fun onLogout() {
+        println("GadhaPlugin logout")
+        // Handle logout lifecycle here
+    }
 }

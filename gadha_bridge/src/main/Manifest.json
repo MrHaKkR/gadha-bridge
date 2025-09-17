@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "Bridge between ToolNeuron and Gadha backend",
   "entry_point": "com.prasanth.gadha.GadhaPlugin",
-  "capabilities": ["chat", "api"],
+  "capabilities": ["chat","api"],
   "api": "v1",
   "type": "api"
 }

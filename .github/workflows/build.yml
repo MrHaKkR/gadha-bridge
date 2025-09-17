@@ -9,19 +9,25 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/setup-node@v4
-      with:
-        node-version: '20'
-    - uses: actions/checkout@v3
-    - name: Set up JDK
-      uses: actions/setup-java@v3
-      with:
-        java-version: '17'
-        distribution: 'temurin'
-    - name: Build with Gradle
-      run: ./gradlew assembleRelease
-    - name: Upload AAR
-      uses: actions/upload-artifact@v3
-      with:
-        name: plugin-aar
-        path: gadha_bridge/build/outputs/aar/*.aar
+      - uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Build with Gradle (downloads Gradle 8.7)
+        uses: gradle/gradle-build-action@v2
+        with:
+          gradle-version: '8.7'
+          arguments: ':gadha_bridge:assembleRelease'
+
+      - name: Upload AAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: plugin-aar
+          path: gadha_bridge/build/outputs/aar/*.aar

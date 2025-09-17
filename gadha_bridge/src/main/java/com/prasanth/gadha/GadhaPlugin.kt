@@ -1,19 +1,9 @@
-package com.prasanth.gadha
-
-import android.content.Context
-import android.util.Log
-
-// Basic skeleton plugin — will connect to Gadha backend later
-class GadhaPlugin : Plugin {
-    override fun onLoad(context: Context) {
-        Log.d("GadhaPlugin", "Loaded Gadha Bridge Plugin")
-    }
-
-    override fun onStart() {
-        Log.d("GadhaPlugin", "Plugin started")
-    }
-
-    override fun onStop() {
-        Log.d("GadhaPlugin", "Plugin stopped")
-    }
+{
+  "name": "com.prasanth.plugin.gadha_bridge",
+  "version": "0.1.0",
+  "description": "Bridge between ToolNeuron and Gadha backend",
+  "entry_point": "com.prasanth.gadha.GadhaPlugin",
+  "capabilities": ["chat","api"],
+  "api": "v1",
+  "type": "api"
 }

@@ -8,32 +8,64 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
 
       - name: Set up Java 17
+        id: setup-java
         uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Build AAR using Gradle
-        run: ./gradlew :gadha_bridge:assembleRelease --no-build-cache
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
 
-      - name: Verify AAR exists
+      - name: Ensure gradlew exists and is executable
         run: |
-          ls -la gadha_bridge/build/outputs/aar/
-          if [ ! -f gadha_bridge/build/outputs/aar/gadha_bridge-release.aar ]; then
-            echo "AAR not found!"
-            exit 1
+          if [ -f ./gradlew ]; then
+            chmod +x ./gradlew
+          else
+            echo "gradlew not found; using direct Gradle download"
+            curl -sLo gradle.zip https://services.gradle.org/distributions/gradle-8.7-bin.zip
+            unzip -q gradle.zip
+            mv gradle-8.7 gradle
+            chmod +x ./gradle/bin/gradle
           fi
 
-      - name: Prepare plugin.zip
+      - name: Build module gadha_bridge (no cache)
+        run: |
+          if [ -f ./gradlew ]; then
+            ./gradlew :gadha_bridge:assembleRelease --no-build-cache
+          else
+            ./gradle/bin/gradle :gadha_bridge:assembleRelease --no-build-cache
+          fi
+        env:
+          JAVA_HOME: ${{ steps.setup-java.outputs.java-home }}
+
+      - name: Collect AAR path
+        id: find_aar
+        run: |
+          set -e
+          ls -la gadha_bridge/build/outputs/aar || true
+          AAR=$(ls gadha_bridge/build/outputs/aar/*.aar 2>/dev/null || true)
+          if [ -z "$AAR" ]; then
+            echo "AAR_NOT_FOUND=true" >> $GITHUB_OUTPUT
+            echo "No AAR produced; failing" 
+            exit 1
+          fi
+          echo "aar_path=$AAR" >> $GITHUB_OUTPUT
+
+      - name: Prepare plugin.zip (AAR + Manifest.json)
         run: |
           mkdir -p packaged_plugin
-          cp gadha_bridge/build/outputs/aar/gadha_bridge-release.aar packaged_plugin/plugin.aar
+          cp "${{ steps.find_aar.outputs.aar_path }}" packaged_plugin/plugin.aar
+          if [ ! -f gadha_bridge/src/main/Manifest.json ]; then
+            echo "Missing Manifest.json at gadha_bridge/src/main/Manifest.json"
+            ls -la gadha_bridge/src/main || true
+            exit 1
+          fi
           cp gadha_bridge/src/main/Manifest.json packaged_plugin/Manifest.json
           cd packaged_plugin
           zip -r ../plugin.zip ./*
@@ -43,7 +75,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: plugin-aar
-          path: gadha_bridge/build/outputs/aar/gadha_bridge-release.aar
+          path: gadha_bridge/build/outputs/aar/*.aar
 
       - name: Upload plugin.zip artifact
         uses: actions/upload-artifact@v4

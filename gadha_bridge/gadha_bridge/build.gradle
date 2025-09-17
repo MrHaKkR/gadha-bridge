@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace "com.mp.gadha"
+    namespace "com.prasanth.gadha"
     compileSdk 34
 
     defaultConfig {

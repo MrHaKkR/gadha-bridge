@@ -20,12 +20,14 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Build with Gradle (no caches)
-        uses: gradle/gradle-build-action@v3
-        with:
-          gradle-version: '8.7'
-          arguments: ':gadha_bridge:assembleRelease --no-build-cache'
-          cache-disabled: true
+      - name: Download Gradle directly
+        run: |
+          curl -sLo gradle.zip https://services.gradle.org/distributions/gradle-8.7-bin.zip
+          unzip -q gradle.zip
+          mv gradle-8.7 gradle
+
+      - name: Build with Gradle (no cache)
+        run: ./gradle/bin/gradle :gadha_bridge:assembleRelease --no-build-cache
 
       - name: Upload AAR
         uses: actions/upload-artifact@v4
